@@ -264,10 +264,6 @@ PRODUCT_PACKAGES += \
     SystemClearSpringOverlay \
     SystemUIClearSpringOverlay
 
-# QS Color Overlay
-PRODUCT_PACKAGES += \
-    QsColor
-
 # QS tile styles
 PRODUCT_PACKAGES += \
     QStileCircleTrim \
