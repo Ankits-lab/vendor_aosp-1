@@ -1,7 +1,7 @@
 PRODUCT_BRAND ?= HyconOS
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
-
+ifeq ($(HYCON_GAPPS),true)
 ifeq ($(PRODUCT_GMS_CLIENTID_BASE),)
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     ro.com.google.clientidbase=android-google
@@ -10,6 +10,12 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     ro.com.google.clientidbase=$(PRODUCT_GMS_CLIENTID_BASE)
 endif
 
+PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
+    ro.error.receiver.system.apps=com.google.android.gms \
+    ro.setupwizard.enterprise_mode=1 \
+    ro.atrace.core.services=com.google.android.gms,com.google.android.gms.ui,com.google.android.gms.persistent
+
+endif
 # Copy all init rc files
 $(foreach f,$(wildcard vendor/aosp/prebuilt/common/etc/init/*.rc),\
 	$(eval PRODUCT_COPY_FILES += $(f):$(TARGET_COPY_OUT_SYSTEM)/etc/init/$(notdir $f)))
@@ -18,10 +24,7 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     dalvik.vm.debug.alloc=0 \
     ro.url.legal=http://www.google.com/intl/%s/mobile/android/basic/phone-legal.html \
     ro.url.legal.android_privacy=http://www.google.com/intl/%s/mobile/android/basic/privacy.html \
-    ro.error.receiver.system.apps=com.google.android.gms \
-    ro.setupwizard.enterprise_mode=1 \
     ro.com.android.dataroaming=false \
-    ro.atrace.core.services=com.google.android.gms,com.google.android.gms.ui,com.google.android.gms.persistent \
     ro.com.android.dateformat=MM-dd-yyyy \
     persist.sys.disable_rescue=true \
     ro.setupwizard.rotation_locked=true
@@ -102,7 +105,7 @@ PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
 # Media
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     media.recorder.show_manufacturer_and_model=true
-
+ifeq ($(HYCON_GAPPS),true)
 # Overlays
 PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += \
     vendor/aosp/overlay \
@@ -111,7 +114,7 @@ PRODUCT_ENFORCE_RRO_EXCLUDED_OVERLAYS += \
 DEVICE_PACKAGE_OVERLAYS += \
     vendor/aosp/overlay/common \
     vendor/aosp/overlay-pixel/common
-
+endif
 # GVM
 PRODUCT_PACKAGES += \
     GVM-SBH-L \
@@ -131,7 +134,7 @@ PRODUCT_PACKAGES += \
 # Dex preopt
 PRODUCT_DEXPREOPT_SPEED_APPS += \
     SystemUI \
-    NexusLauncherRelease
+#    NexusLauncherRelease
 
 # Hycon Packages
 PRODUCT_PACKAGES += \
@@ -156,6 +159,8 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     QuickAccessWallet
 
+ifeq ($(HYCON_GAPPS),true)
+
 # Gboard configuration
 PRODUCT_PRODUCT_PROPERTIES += \
     ro.com.google.ime.bs_theme=true \
@@ -172,6 +177,8 @@ PRODUCT_PRODUCT_PROPERTIES += \
     setupwizard.feature.skip_button_use_mobile_data.carrier1839=true \
     setupwizard.feature.show_pai_screen_in_main_flow.carrier1839=false \
     setupwizard.feature.show_pixel_tos=false
+
+endif
 
 # StorageManager configuration
 PRODUCT_PRODUCT_PROPERTIES += \
@@ -232,7 +239,8 @@ $(call inherit-product, vendor/aosp/config/bootanimation.mk)
 $(call inherit-product, vendor/aosp/config/fonts.mk)
 
 # GApps
-$(call inherit-product, vendor/gapps/config.mk)
+ifeq ($(HYCON_GAPPS),true)
+include vendor/gapps/config.mk
 
 # OTA
 $(call inherit-product, vendor/aosp/config/ota.mk)
@@ -240,6 +248,9 @@ $(call inherit-product, vendor/aosp/config/ota.mk)
 # RRO Overlays
 $(call inherit-product, vendor/aosp/config/rro_overlays.mk)
 
+else
+include vendor/aosp/config/basicapps.mk
+endif
 # Custom Overlays
 # Settings
 PRODUCT_PACKAGES += \
